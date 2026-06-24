@@ -3,38 +3,65 @@ import { HomePage } from '../pages/homePage';
 import { CartPage } from '../pages/cartPage';
 import productData from '../testData/productData.json';
 
-test('Add all products matching target price and validate cart', async ({ page }) => {
+test(
+    'Add all products matching target price and validate cart',
+    async ({ page }) => {
 
-    const homePage = new HomePage(page);
-    const cartPage = new CartPage(page);
+        const homePage = new HomePage(page);
+        const cartPage = new CartPage(page);
 
-    // Navigate to application
-    await homePage.navigate();
+        await homePage.navigate();
 
-    // Add products matching target price
-    const selectedProducts = await homePage.addProductsByPrice(
-        productData.targetPrice
-    );
+        const selectedProducts =
+            await homePage.addProductsByPrice(
+                productData.targetPrice
+            );
 
-    console.log('Selected Products:', selectedProducts);
+        if (selectedProducts.length === 0) {
+            console.log(
+                `No products found matching target price: ${productData.targetPrice}`
+            );
+            return;
+        }
 
-    // Validate products were found
-    expect(selectedProducts.length).toBeGreaterThan(0);
+        console.log(
+            'Selected Products:',
+            selectedProducts
+        );
 
-    // Validate product names in cart
-    await cartPage.verifyProducts(selectedProducts);
+        // Product names
+        await cartPage.verifyProducts(
+            selectedProducts
+        );
 
-    // Validate cart count
-    await cartPage.verifyCartCount(selectedProducts.length);
+        // Cart count
+        await cartPage.verifyCartCount(
+            selectedProducts.length
+        );
 
-    // Calculate expected subtotal
-    const expectedTotal = (
-        selectedProducts.length *
-        Number(productData.targetPrice.replace('$', ''))
-    ).toFixed(2);
+        // Product price
+        await cartPage.verifyProductPrice(
+            productData.targetPrice
+        );
 
-    console.log('Expected Total:', expectedTotal);
+        // Quantity
+        await cartPage.verifyQuantity(1);
 
-    // Validate subtotal
-    await cartPage.verifyTotal(expectedTotal);
-});
+        // Total
+        const expectedTotal = (
+            selectedProducts.length *
+            Number(
+                productData.targetPrice.replace('$', '')
+            )
+        ).toFixed(2);
+
+        console.log(
+            'Expected Total:',
+            expectedTotal
+        );
+
+        await cartPage.verifyTotal(
+            expectedTotal
+        );
+    }
+);

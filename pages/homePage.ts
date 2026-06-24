@@ -4,17 +4,20 @@ export class HomePage {
 
     readonly page: Page;
     readonly productCards: Locator;
+    readonly closeCartButton: Locator;
 
     constructor(page: Page) {
         this.page = page;
         this.productCards =
-            page.locator('div[class*="sc-124al1g-2"]');
+            page.locator('div[tabindex="1"]', {
+                has: page.getByRole('button', { name: 'Add to cart' })
+            });
+        this.closeCartButton =
+            page.locator('button', { hasText: 'X' }).first();
     }
 
 async navigate() {
-    await this.page.goto(
-        'https://react-shopping-cart-67954.firebaseapp.com/'
-    );
+    await this.page.goto('/');
 
     await this.page.waitForLoadState('networkidle');
 
@@ -33,22 +36,24 @@ async addProductsByPrice(targetPrice: string) {
 
         const card = this.productCards.nth(i);
 
-        const text = await card.innerText();
+        const mainPrice = await card.locator('p').nth(1).innerText();
 
+        if (mainPrice.trim() === targetPrice) {
 
-        if (text.includes(targetPrice)) {
+            const productName = (await card.locator('p').first().textContent())?.trim() || '';
+            if (productName) {
+                selectedProducts.push(productName);
+            }
 
-            const lines = text
-                .split('\n')
-                .filter(line => line.trim() !== '');
+            await card.locator('button', { hasText: 'Add to cart' }).click();
 
-            selectedProducts.push(lines[1]);
-
-            await card
-                .getByRole('button', { name: 'Add to cart' })
-                .click();
+            if (await this.closeCartButton.isVisible()) {
+                await this.closeCartButton.click();
+            }
         }
     }
-    return selectedProducts;
-}
+
+        return selectedProducts; 
+    }
+
 }

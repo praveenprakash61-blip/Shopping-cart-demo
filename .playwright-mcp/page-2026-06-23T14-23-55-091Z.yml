@@ -1,0 +1,47 @@
+- generic [ref=e3]:
+  - link "View source on Github":
+    - /url: https://github.com/jeffersonRibeiro/react-shopping-cart
+    - img [ref=e9] [cursor=pointer]
+  - generic [ref=e13]:
+    - img "Jeremy Akeze - Doghouse IT Recruitment" [ref=e15]
+    - generic [ref=e16]:
+      - heading "Work in the Netherlands" [level=4] [ref=e17]: Work in the Netherlands
+      - paragraph [ref=e19]:
+        - text: Hi! I'm Jeremy Akeze from Doghouse IT Recruitment and I'm looking for skilled Software Engineers like you. If you wish to move abroad,
+        - link "follow me on Linkedin." [ref=e20] [cursor=pointer]:
+          - /url: https://www.linkedin.com/in/jeremy-akeze-9542b396/
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "Sizes:" [level=4] [ref=e24]
+        - generic [ref=e26] [cursor=pointer]:
+          - checkbox "XS" [ref=e27]
+          - generic [ref=e28]: XS
+        - generic [ref=e30] [cursor=pointer]:
+          - checkbox "S" [ref=e31]
+          - generic [ref=e32]: S
+        - generic [ref=e34] [cursor=pointer]:
+          - checkbox "M" [ref=e35]
+          - generic [ref=e36]: M
+        - generic [ref=e38] [cursor=pointer]:
+          - checkbox "ML" [ref=e39]
+          - generic [ref=e40]: ML
+        - generic [ref=e42] [cursor=pointer]:
+          - checkbox "L" [ref=e43]
+          - generic [ref=e44]: L
+        - generic [ref=e46] [cursor=pointer]:
+          - checkbox "XL" [ref=e47]
+          - generic [ref=e48]: XL
+        - generic [ref=e50] [cursor=pointer]:
+          - checkbox "XXL" [ref=e51]
+          - generic [ref=e52]: XXL
+      - generic [ref=e53]:
+        - paragraph [ref=e54]: Leave a star on Github if this repository was useful :)
+        - link "Star jeffersonRibeiro/react-shopping-cart on GitHub" [ref=e55] [cursor=pointer]:
+          - /url: https://github.com/jeffersonRibeiro/react-shopping-cart
+          - text: Star
+    - main [ref=e56]:
+      - main [ref=e57]:
+        - paragraph [ref=e58]: 0 Product(s) found
+  - button "0" [ref=e60] [cursor=pointer]:
+    - generic "Products in cart quantity" [ref=e62]: "0"
