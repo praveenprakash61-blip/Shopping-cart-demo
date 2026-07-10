@@ -19,7 +19,7 @@ export class HomePage {
 async navigate() {
     await this.page.goto('/');
 
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForLoadState('load');
 
     await this.page
         .getByRole('button', { name: 'Add to cart' })
