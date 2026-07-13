@@ -7,6 +7,9 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
   },
-  reporter: [['html', { open: 'only-on-failure' }]],
+  reporter: [
+  ['html'],
+  ['junit', { outputFile: 'test-results/results.xml' }]
+]
   
 });
