@@ -60,9 +60,7 @@ export class HomePage extends BasePage {
         return selectedProducts;
     }
 
-    // ===========================
-    // Private Helper Methods
-    // ===========================
+ 
 
     private async getProductName(card: Locator): Promise<string> {
 

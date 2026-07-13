@@ -1,3 +1,5 @@
+name: Playwright-Enterprise-Framework-$(Date:yyyyMMdd)-$(Rev:r)
+
 trigger:
   branches:
     include:
@@ -24,14 +26,21 @@ steps:
   displayName: 'Checkout Repository'
 
 # Install Node.js
-- task: NodeTool@0
-  inputs:
-    versionSpec: $(NODE_VERSION)
+- task: UseNode@1
   displayName: 'Install Node.js'
+  inputs:
+    version: $(NODE_VERSION)
 
-# Install Dependencies
+# Cache npm packages
+- task: Cache@2
+  displayName: 'Cache npm Packages'
+  inputs:
+    key: 'npm | "$(Agent.OS)" | package-lock.json'
+    path: $(Pipeline.Workspace)/.npm
+
+# Install Project Dependencies
 - script: |
-    npm ci
+    npm ci --cache $(Pipeline.Workspace)/.npm
   displayName: 'Install Project Dependencies'
 
 # Install Playwright Browsers
@@ -39,21 +48,22 @@ steps:
     npx playwright install --with-deps
   displayName: 'Install Playwright Browsers'
 
-# Execute Tests
+# Execute Playwright Tests
 - script: |
     npx playwright test
   displayName: 'Execute Playwright Tests'
   env:
     TEST_ENV: $(TEST_ENV)
 
-# Publish Test Results (JUnit)
+# Publish JUnit Test Results
 - task: PublishTestResults@2
-  displayName: 'Publish Test Results'
+  displayName: 'Publish JUnit Test Results'
   condition: always()
   inputs:
     testResultsFormat: 'JUnit'
     testResultsFiles: 'test-results/results.xml'
-    failTaskOnFailedTests: false
+    failTaskOnFailedTests: true
+    testRunTitle: 'Playwright Automation Results'
 
 # Publish HTML Report
 - task: PublishPipelineArtifact@1
@@ -63,10 +73,10 @@ steps:
     targetPath: 'playwright-report'
     artifact: 'PlaywrightReport'
 
-# Publish Trace / Screenshots / Videos
+# Publish Screenshots, Videos & Traces
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Test Artifacts'
   condition: always()
   inputs:
     targetPath: 'test-results'
-    artifact: 'TestResults'
+    artifact: 'TestArtifacts'
