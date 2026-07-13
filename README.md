@@ -183,6 +183,9 @@ The framework generates:
 - CI/CD Ready
 
 ---
+---Pipeline successfully executed ---
+<img width="1475" height="383" alt="image" src="https://github.com/user-attachments/assets/1c411f19-cd1f-4968-bc47-ae07253a3237" />
+
 
 ## Author
 
