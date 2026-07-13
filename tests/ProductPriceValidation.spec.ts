@@ -23,7 +23,6 @@ test(
             );
             return;
         }
-
         console.log(
             'Selected Products:',
             selectedProducts
