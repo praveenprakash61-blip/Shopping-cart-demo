@@ -1,59 +1,96 @@
 import { Page, Locator } from '@playwright/test';
+import { BasePage } from '../base/BasePage';
 
-export class HomePage {
+export class HomePage extends BasePage {
 
-    readonly page: Page;
     readonly productCards: Locator;
     readonly closeCartButton: Locator;
+    readonly addToCartButton: Locator;
 
     constructor(page: Page) {
-        this.page = page;
-        this.productCards =
-            page.locator('div[tabindex="1"]', {
-                has: page.getByRole('button', { name: 'Add to cart' })
-            });
-        this.closeCartButton =
-            page.locator('button', { hasText: 'X' }).first();
+        super(page);
+
+        this.productCards = page.locator('div[tabindex="1"]', {
+            has: page.getByRole('button', { name: 'Add to cart' })
+        });
+
+        this.addToCartButton = page.getByRole('button', {
+            name: 'Add to cart'
+        }).first();
+
+        this.closeCartButton = page.locator('button', {
+            hasText: 'X'
+        }).first();
     }
 
-async navigate() {
-    await this.page.goto('/');
+    async navigate(): Promise<void> {
 
-    await this.page.waitForLoadState('load');
+        await super.navigate('/');
 
-    await this.page
-        .getByRole('button', { name: 'Add to cart' })
-        .first()
-        .waitFor();
-}
-async addProductsByPrice(targetPrice: string) {
+        await this.waitForPageLoad();
 
-    const selectedProducts: string[] = [];
+        await this.waitForVisible(this.addToCartButton);
+    }
 
-    const count = await this.productCards.count();
+    async addProductsByPrice(targetPrice: string): Promise<string[]> {
 
-    for (let i = 0; i < count; i++) {
+        const selectedProducts: string[] = [];
 
-        const card = this.productCards.nth(i);
+        const totalProducts = await this.productCards.count();
 
-        const mainPrice = await card.locator('p').nth(1).innerText();
+        for (let index = 0; index < totalProducts; index++) {
 
-        if (mainPrice.trim() === targetPrice) {
+            const card = this.productCards.nth(index);
 
-            const productName = (await card.locator('p').first().textContent())?.trim() || '';
-            if (productName) {
-                selectedProducts.push(productName);
+            const productPrice = await this.getProductPrice(card);
+
+            if (productPrice !== targetPrice) {
+                continue;
             }
 
-            await card.locator('button', { hasText: 'Add to cart' }).click();
+            const productName = await this.getProductName(card);
 
-            if (await this.closeCartButton.isVisible()) {
-                await this.closeCartButton.click();
-            }
+            selectedProducts.push(productName);
+
+            await this.addProductToCart(card);
+
+            await this.closeMiniCart();
+        }
+
+        return selectedProducts;
+    }
+
+    // ===========================
+    // Private Helper Methods
+    // ===========================
+
+    private async getProductName(card: Locator): Promise<string> {
+
+        return await this.getText(
+            card.locator('p').first()
+        );
+    }
+
+    private async getProductPrice(card: Locator): Promise<string> {
+
+        return await this.getText(
+            card.locator('p').nth(1)
+        );
+    }
+
+    private async addProductToCart(card: Locator): Promise<void> {
+
+        await this.click(
+            card.getByRole('button', {
+                name: 'Add to cart'
+            })
+        );
+    }
+
+    private async closeMiniCart(): Promise<void> {
+
+        if (await this.isVisible(this.closeCartButton)) {
+            await this.click(this.closeCartButton);
         }
     }
-
-        return selectedProducts; 
-    }
-
 }

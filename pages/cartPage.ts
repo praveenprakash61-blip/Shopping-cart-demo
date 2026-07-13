@@ -1,103 +1,105 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { BasePage } from '../base/BasePage';
 
-export class CartPage {
+export class CartPage extends BasePage {
 
-    readonly page: Page;
-
-    readonly cartOpenButton: Locator;
     readonly checkoutButton: Locator;
+    readonly cartOpenButton: Locator;
 
     constructor(page: Page) {
+        super(page);
 
-        this.page = page;
+        this.checkoutButton = page.getByRole('button', {
+            name: 'Checkout'
+        });
 
-        this.checkoutButton =
-            page.getByRole('button', { name: 'Checkout' });
-
-        this.cartOpenButton =
-            page.locator('button', {
-                has: page.locator('[title="Products in cart quantity"]')
-            }).first();
+        this.cartOpenButton = page.locator('button', {
+            has: page.locator('[title="Products in cart quantity"]')
+        }).first();
     }
 
-    private get cartContainer() {
+    private get cartContainer(): Locator {
         return this.page.locator('div', {
             has: this.checkoutButton,
             hasText: 'Cart'
         }).first();
     }
 
-    private get cartItems() {
-        return this.cartContainer.locator('xpath=.//button[@title="remove product from cart"]/parent::div');
+    private get cartItems(): Locator {
+        return this.cartContainer.locator(
+            'xpath=.//button[@title="remove product from cart"]/parent::div'
+        );
     }
 
-    private get quantityLabels() {
+    private get quantityLabels(): Locator {
         return this.cartItems.locator('text=Quantity:');
     }
 
-    private get subtotalAmount() {
-        return this.cartContainer.locator('p', { hasText: '$' }).last();
-    }
+    private async ensureCartOpen(): Promise<void> {
 
-    private async ensureCartOpen() {
         if (await this.cartContainer.count() === 0) {
-            await this.cartOpenButton.click();
-            await expect(this.checkoutButton).toBeVisible();
+
+            await this.click(this.cartOpenButton);
+
+            await this.waitForVisible(this.checkoutButton);
         }
     }
 
-    async verifyProducts(products: string[]) {
+    async verifyProducts(products: string[]): Promise<void> {
 
         await this.ensureCartOpen();
-        const cartText = await this.cartContainer.textContent();
+
+        const cartText = await this.getText(this.cartContainer);
 
         for (const product of products) {
             expect(cartText).toContain(product);
         }
     }
 
-    async verifyCartCount(expectedCount: number) {
+    async verifyCartCount(expectedCount: number): Promise<void> {
+
         await this.ensureCartOpen();
 
-        await expect(this.cartItems)
-            .toHaveCount(expectedCount);
+        await this.verifyCount(this.cartItems, expectedCount);
     }
 
-    async verifyProductPrice(price: string) {
+    async verifyProductPrice(expectedPrice: string): Promise<void> {
 
         await this.ensureCartOpen();
 
-        const normalizedTarget = price.replace(/\s+/g, '');
-        const priceText = await this.cartItems
+        const normalizedExpected = expectedPrice.replace(/\s+/g, '');
+
+        const prices = await this.cartItems
             .locator('p', { hasText: '$' })
             .allTextContents();
 
-        const matches = priceText
-            .map(p => p.replace(/\s+/g, ''))
-            .some(p => p.includes(normalizedTarget));
+        const found = prices
+            .map(price => price.replace(/\s+/g, ''))
+            .some(price => price.includes(normalizedExpected));
 
-        expect(matches).toBe(true);
+        expect(found).toBeTruthy();
     }
 
-    async verifyQuantity(expectedQuantity: number) {
+    async verifyQuantity(expectedQuantity: number): Promise<void> {
+
         await this.ensureCartOpen();
 
-        const quantities =
-            await this.quantityLabels.allTextContents();
+        const quantities = await this.quantityLabels.allTextContents();
 
         expect(quantities.length).toBeGreaterThan(0);
 
-        for (const qty of quantities) {
-
-            expect(qty)
-                .toContain(`Quantity: ${expectedQuantity}`);
+        for (const quantity of quantities) {
+            expect(quantity).toContain(`Quantity: ${expectedQuantity}`);
         }
     }
 
-    async verifyTotal(total: string) {
+    async verifyTotal(expectedTotal: string): Promise<void> {
+
         await this.ensureCartOpen();
 
-        await expect(this.cartContainer)
-            .toContainText(`$ ${total}`);
+        await this.verifyContainsText(
+            this.cartContainer,
+            `$ ${expectedTotal}`
+        );
     }
 }
